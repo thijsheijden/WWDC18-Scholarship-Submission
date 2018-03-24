@@ -8,7 +8,6 @@ public class StartViewController : UIViewController {
         //Variables and Constants
         let view = UIView()
         let centerX = 140
-        let centerY = 300
         let yellowColor = UIColor(red:1.00, green:0.92, blue:0.23, alpha:1.0)
         
         self.view = view
@@ -59,9 +58,9 @@ public class StartViewController : UIViewController {
     }
     
     @objc func questionButtonPressed() {
-        let questionVC = QuestionViewController()
-        questionVC.modalTransitionStyle = .coverVertical
-        present(questionVC, animated: true, completion: nil)
+        let rulesVC = RulesViewController()
+        rulesVC.modalTransitionStyle = .coverVertical
+        present(rulesVC, animated: true, completion: nil)
     }
     
 }

@@ -4,26 +4,28 @@ import UIKit
 import PlaygroundSupport
 
 public class GameViewController : UIViewController {
-    public override func loadView() {
-        
+    
+    let drawView = CanvasView()
+    
+    public override func viewDidLoad() {
+        super.viewDidLoad()
+
         //MARK: Variables and constants
-        let view = UIView()
-        self.view = view
-        view.backgroundColor = .white
-        var timer = Timer()
-        var timeInSeconds = 30
-        var isTimerRunning = false
-        
-        let drawView = CanvasView()
-        drawView.backgroundColor = UIColor.black
-        drawView.frame = CGRect(x: 0, y: 250, width: 380, height: 600)
-        view.addSubview(drawView)
+        let yellowColor = UIColor(red:1.00, green:0.92, blue:0.23, alpha:1.0)
+        var roundNumber = 1
+        var currentScore = 0
         
         //MARK: Setting up the UI
-        //Making the time left label
-        var timeLabel = UILabel()
-        timeLabel.text = "00:00:00"
-        timeLabel.frame = CGRect(x: 0, y: 100, width: 100, height: 50)
+        //Setting up the initial view
+        let view = UIView()
+        self.view = view
+        view.backgroundColor = yellowColor
+        
+        //Adding the view which can be drawn on
+        drawView.backgroundColor = UIColor.white
+        drawView.frame = CGRect(x: 12.5, y: 250, width: 350, height: 350)
+        drawView.layer.cornerRadius = 20
+        view.addSubview(drawView)
         
         //Adding a button to start the round
         let startRoundButton = UIButton()
@@ -32,48 +34,16 @@ public class GameViewController : UIViewController {
         
         startRoundButton.addTarget(self, action: #selector(startRoundButtonPressed), for: .touchUpInside)
         
-        //MARK: Setting up a timer that displays the time left in the round
-        //Function to start the timer
-//        func startTimerFunction() {
-//            
-//            if isTimerRunning == false {
-//                runTimer()
-//            } else {
-//                print("Timer was already running")
-//            }
-//            
-//        }
+        //Adding a button clear the canvas
+        let clearCanvasButton = UIButton()
+        let clearCanvasButtonImage = UIImage(named: "clearButton")
+        clearCanvasButton.setImage(clearCanvasButtonImage, for: .normal)
+        clearCanvasButton.frame = CGRect(x: 12.5, y: 620, width: 110, height: 27)
+        view.addSubview(clearCanvasButton)
         
-//        func runTimer() {
-//            timer = Timer.scheduledTimer(timeInterval: 1, target: self,   selector: (#selector(GameViewController.updateTimer)), userInfo: nil, repeats: true)
-//            isTimerRunning = true
-//        }
-//
-//        func updateTimer() {
-//            if timeInSeconds < 1 {
-//                timer.invalidate()
-//
-//                //Timer is not running anymore so set that variable to false
-//                isTimerRunning = false
-//
-//                //setting the label to 00 : 00 : 00 in case the app was closed when the timer reached 0
-//                timeLabel.text = timeString(time: TimeInterval(0))
-//
-//
-//            } else {
-//                timeInSeconds -= 1
-//                timeLabel.text = timeString(time: TimeInterval(timeInSeconds))
-//            }
-//        }
-//
-//        //Function that correctly formats the time for the time label
-//        func timeString(time:TimeInterval) -> String {
-//            let hours = Int(time) / 3600
-//            let minutes = Int(time) / 60 % 60
-//            let seconds = Int(time) % 60
-//            return String(format:"%02i:%02i", minutes, seconds)
-//        }
-
+        clearCanvasButton.addTarget(self, action: #selector(clearCanvasButtonPressed), for: .touchUpInside)
+        
+        //MARK: Functions
         
     }
     
@@ -81,4 +51,9 @@ public class GameViewController : UIViewController {
         
     }
     
+    //Clear the canvas when the clear button is pressed
+    @objc func clearCanvasButtonPressed() {
+        drawView.clearCanvas()
+    }
+
 }
