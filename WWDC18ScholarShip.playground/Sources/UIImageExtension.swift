@@ -1,10 +1,3 @@
-//
-//  UIImageExtension.swift
-//  HandWritingRecognition
-//
-//  Created by Wei Chieh on 05/12/2017.
-//
-
 import UIKit
 
 extension UIImage {

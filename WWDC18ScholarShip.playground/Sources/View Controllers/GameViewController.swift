@@ -9,6 +9,7 @@ public class GameViewController : UIViewController {
     let drawView = CanvasView()
     var request = [VNRequest]()
     let resultLabel = UILabel()
+    let scoreLabel = UILabel()
     
     public override func viewDidLoad() {
         super.viewDidLoad()
@@ -29,22 +30,27 @@ public class GameViewController : UIViewController {
         self.view = view
         view.backgroundColor = yellowColor
         
-        //Creating label that shows the result
+        //Creating a label that displays the users score
+        scoreLabel.text = "Score: \(currentScore)"
+        scoreLabel.frame = CGRect(x: 275, y: 12.5, width: 100, height: 50)
+        view.addSubview(scoreLabel)
+        
+        //Creating label that shows what the computer see's
         resultLabel.frame = CGRect(x: 187.5, y: 100, width: 100, height: 50)
         resultLabel.text = "Hello"
         view.addSubview(resultLabel)
         
         //Adding the view which can be drawn on
-        drawView.backgroundColor = UIColor.black
-        drawView.frame = CGRect(x: 12.5, y: 250, width: 350, height: 350)
+        drawView.backgroundColor = UIColor.white
+        drawView.frame = CGRect(x: 12.5, y: 200, width: 350, height: 350)
         drawView.layer.cornerRadius = 20
         view.addSubview(drawView)
         
         //Adding a button to start the round
         let startRoundButton = UIButton()
-        let startRoundButtonImage = UIImage(named: "singlePlayerStartButton.png") as UIImage?
+        let startRoundButtonImage = UIImage(named: "startButton.png") as UIImage?
         startRoundButton.setImage(startRoundButtonImage, for: .normal)
-        startRoundButton.frame = CGRect(x: 250, y: 620, width: 100, height: 50)
+        startRoundButton.frame = CGRect(x: 252.5, y: 570, width: 110, height: 27)
         view.addSubview(startRoundButton)
         
         startRoundButton.addTarget(self, action: #selector(startRoundButtonPressed), for: .touchUpInside)
@@ -53,16 +59,16 @@ public class GameViewController : UIViewController {
         let clearCanvasButton = UIButton()
         let clearCanvasButtonImage = UIImage(named: "clearButton")
         clearCanvasButton.setImage(clearCanvasButtonImage, for: .normal)
-        clearCanvasButton.frame = CGRect(x: 12.5, y: 620, width: 110, height: 27)
+        clearCanvasButton.frame = CGRect(x: 12.5, y: 570, width: 110, height: 27)
         view.addSubview(clearCanvasButton)
         
         clearCanvasButton.addTarget(self, action: #selector(clearCanvasButtonPressed), for: .touchUpInside)
         
     }
     
-    //MARK: Functions
+    //MARK: Functions that control the neural network requests
     func setupCoreMLRequest() {
-        let my_model = my_mnist().model
+        let my_model = pictionairy().model
         
         print("Coreml setup ran")
         
@@ -101,7 +107,7 @@ public class GameViewController : UIViewController {
         
         print("recognize function ran")
         
-        let image = UIImage(view: drawView).scale(toSize: CGSize(width: 28, height: 28))
+        let image = UIImage(view: drawView).scale(toSize: CGSize(width: 120, height: 120))
         
         let imageRequest = VNImageRequestHandler(cgImage: image.cgImage!, options: [:])
         do {
@@ -120,9 +126,17 @@ public class GameViewController : UIViewController {
         }
     }
     
+    //Function that calls the recognize fuction every 2 seconds
+    @objc func startAnalyzingDrawView() {
+        recognize()
+        print("Started the 2 second interval")
+    }
+    
     //MARK: Buttons
     @objc func startRoundButtonPressed() {
-        recognize()
+        //Creating a timer that calls the recognize function every 2 seconds to analyze the drawView
+        var gameTimer = Timer.scheduledTimer(timeInterval: 2.0, target: self, selector: #selector(GameViewController.startAnalyzingDrawView), userInfo: nil, repeats: true)
+        startAnalyzingDrawView()
         print("start button pressed")
     }
     

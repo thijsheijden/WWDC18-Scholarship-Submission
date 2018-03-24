@@ -56,7 +56,7 @@ public class CanvasView: UIView {
     }
     
     public func setupDefaultSettings() {
-        lineColor = .white
+        lineColor = .black
         lineWidth = 5
         
         clipsToBounds = true

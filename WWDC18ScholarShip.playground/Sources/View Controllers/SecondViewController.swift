@@ -3,6 +3,12 @@ import UIKit
 import PlaygroundSupport
 
 public class ViewController2 : UIViewController {
+    
+    @objc func sayHello()
+    {
+        NSLog("hello World")
+    }
+    
     public override func loadView() {
         let view = UIView()
         view.backgroundColor = .white
@@ -14,6 +20,9 @@ public class ViewController2 : UIViewController {
         
         view.addSubview(label)
         self.view = view
+        
+        var gameTimer = Timer.scheduledTimer(timeInterval: 60.0, target: self, selector: #selector(ViewController2.sayHello), userInfo: nil, repeats: true)
+        
         
     }
     
