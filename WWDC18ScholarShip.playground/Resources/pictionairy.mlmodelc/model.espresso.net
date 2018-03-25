@@ -12,11 +12,11 @@
       "pad_fill_mode" : 0,
       "pad_b" : 0,
       "pad_l" : 0,
-      "top" : "conv2d_3__activation___output",
+      "top" : "conv2d_17__activation___output",
       "blob_weights" : 3,
       "K" : 3,
       "blob_biases" : 1,
-      "name" : "conv2d_3",
+      "name" : "conv2d_17",
       "has_batch_norm" : 0,
       "type" : "convolution",
       "n_groups" : 1,
@@ -51,10 +51,10 @@
       "pad_b" : 0,
       "size_x" : 2,
       "pad_fill_mode" : 0,
-      "bottom" : "conv2d_3__activation___output",
+      "bottom" : "conv2d_17__activation___output",
       "pad_l" : 0,
-      "name" : "max_pooling2d_3",
-      "top" : "max_pooling2d_3_output"
+      "name" : "max_pooling2d_17",
+      "top" : "max_pooling2d_17_output"
     },
     {
       "pad_r" : 0,
@@ -63,18 +63,18 @@
       "pad_fill_mode" : 0,
       "pad_b" : 0,
       "pad_l" : 0,
-      "top" : "conv2d_4__activation___output",
+      "top" : "conv2d_18__activation___output",
       "blob_weights" : 7,
       "K" : 32,
       "blob_biases" : 5,
-      "name" : "conv2d_4",
+      "name" : "conv2d_18",
       "has_batch_norm" : 0,
       "type" : "convolution",
       "n_groups" : 1,
       "pad_t" : 0,
       "has_biases" : 1,
       "C" : 32,
-      "bottom" : "max_pooling2d_3_output",
+      "bottom" : "max_pooling2d_17_output",
       "weights" : {
 
       },
@@ -102,25 +102,25 @@
       "pad_b" : 0,
       "size_x" : 2,
       "pad_fill_mode" : 0,
-      "bottom" : "conv2d_4__activation___output",
+      "bottom" : "conv2d_18__activation___output",
       "pad_l" : 0,
-      "name" : "max_pooling2d_4",
-      "top" : "max_pooling2d_4_output"
+      "name" : "max_pooling2d_18",
+      "top" : "max_pooling2d_18_output"
     },
     {
-      "bottom" : "max_pooling2d_4_output",
+      "bottom" : "max_pooling2d_18_output",
       "weights" : {
 
       },
       "mode" : 1,
       "hint_fallback_from_metal" : 1,
-      "top" : "flatten_2_output",
+      "top" : "flatten_9_output",
       "type" : "flatten",
-      "name" : "flatten_2"
+      "name" : "flatten_9"
     },
     {
       "nB" : 25088,
-      "top" : "dense_4__activation___output",
+      "top" : "dense_21__activation___output",
       "has_biases" : 1,
       "weights" : {
 
@@ -129,16 +129,16 @@
       "blob_weights" : 11,
       "type" : "inner_product",
       "has_relu" : 1,
-      "bottom" : "flatten_2_output",
+      "bottom" : "flatten_9_output",
       "blob_biases" : 9,
       "has_tanh" : 0,
       "hint_fallback_from_metal" : 1,
-      "name" : "dense_4",
+      "name" : "dense_21",
       "has_prelu" : 0
     },
     {
       "nB" : 128,
-      "top" : "dense_5__activation___output",
+      "top" : "dense_22__activation___output",
       "has_biases" : 1,
       "weights" : {
 
@@ -147,27 +147,27 @@
       "blob_weights" : 15,
       "type" : "inner_product",
       "has_relu" : 1,
-      "bottom" : "dense_4__activation___output",
+      "bottom" : "dense_21__activation___output",
       "blob_biases" : 13,
       "has_tanh" : 0,
-      "name" : "dense_5",
+      "name" : "dense_22",
       "has_prelu" : 0
     },
     {
       "nB" : 128,
-      "top" : "dense_6_output",
+      "top" : "dense_23_output",
       "has_biases" : 1,
       "weights" : {
 
       },
-      "nC" : 3,
+      "nC" : 8,
       "blob_weights" : 19,
       "type" : "inner_product",
       "has_relu" : 0,
-      "bottom" : "dense_5__activation___output",
+      "bottom" : "dense_22__activation___output",
       "blob_biases" : 17,
       "has_tanh" : 0,
-      "name" : "dense_6",
+      "name" : "dense_23",
       "has_prelu" : 0
     },
     {
@@ -177,8 +177,8 @@
       },
       "top" : "prediction",
       "type" : "softmax",
-      "name" : "dense_6__activation__",
-      "bottom" : "dense_6_output"
+      "name" : "dense_23__activation__",
+      "bottom" : "dense_23_output"
     }
   ]
 }

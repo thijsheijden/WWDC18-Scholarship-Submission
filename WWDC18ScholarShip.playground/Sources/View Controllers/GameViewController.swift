@@ -23,12 +23,19 @@ public class GameViewController : UIViewController {
     let endOfRoundClosePopUpButton = UIButton()
     var toDrawObject = ""
     let toDrawObjectLabel = UILabel()
-    let objectNames = ["iphone", "macbook", "apple"]
+    let objectNames = ["iPhone", "MacBook", "Apple", "Watch", "HomePod", "iPhone X", "Swift", "iPod"]
     var gameTimer = Timer()
+    var numberOfPoints = 100
+    var pointsTimer = Timer()
+    let roundLabel = UILabel()
+    var roundNumber = 1
     
     //UI for AI drawing round
     let startAIRoundButton = UIButton()
     let aiDrawView = UIView()
+    let aiPopupLabel = UILabel()
+    let aiGuessTextBox = UITextField()
+    let enterButton = UIButton()
     
     public override func viewDidLoad() {
         super.viewDidLoad()
@@ -39,9 +46,6 @@ public class GameViewController : UIViewController {
         
         //MARK: Variables and constants
         let yellowColor = UIColor(red:1.00, green:0.92, blue:0.23, alpha:1.0)
-        var roundNumber = 1
-        var currentScore = 0
-        
         
         //Adding the san fransisco black font
         let cfURL = Bundle.main.url(forResource: "SanFranciscoDisplay-Black", withExtension: "otf")! as CFURL
@@ -59,12 +63,14 @@ public class GameViewController : UIViewController {
         view.backgroundColor = yellowColor
         
         //Creating a label that displays the users score
-        scoreLabel.text = "Score: \(currentScore)"
-        scoreLabel.frame = CGRect(x: 275, y: 12.5, width: 100, height: 50)
+        scoreLabel.text = "Score: 0"
+        scoreLabel.textAlignment = .right
+        scoreLabel.frame = CGRect(x: 275, y: 12.5, width: 80, height: 50)
+        scoreLabel.font = UIFont(name: "SanFranciscoDisplay-Black", size: 18)
         view.addSubview(scoreLabel)
         
         //Creating label that shows what the computer see's
-        resultLabel.frame = CGRect(x: 37.5, y: 50, width: 300, height: 150)
+        resultLabel.frame = CGRect(x: 37.5, y: 100, width: 300, height: 150)
         resultLabel.text = "💻 doesn't see anything yet..."
         resultLabel.font = UIFont(name: "SanFranciscoDisplay-Black", size: 35)
         resultLabel.textAlignment = .center
@@ -73,14 +79,21 @@ public class GameViewController : UIViewController {
         
         //Adding the view which can be drawn on
         drawView.backgroundColor = UIColor.white
-        drawView.frame = CGRect(x: 12.5, y: 200, width: 350, height: 350)
+        drawView.frame = CGRect(x: 12.5, y: 250, width: 350, height: 350)
         drawView.layer.cornerRadius = 20
         view.addSubview(drawView)
+        
+        //Creating a label that shows which round it is
+        roundLabel.textAlignment = .left
+        determineRoundLabelText()
+        roundLabel.frame = CGRect(x: 12.5, y: 12.5, width: 275, height: 50)
+        roundLabel.font = UIFont(name: "SanFranciscoDisplay-Black", size: 14)
+        view.addSubview(roundLabel)
         
         //Adding the label that displays the object that should be drawn
         toDrawObjectLabel.text = ""
         toDrawObjectLabel.font = UIFont(name: "SanFranciscoDisplay-Black", size: 20)
-        toDrawObjectLabel.frame = CGRect(x: 252.5, y: 570, width: 110, height: 30)
+        toDrawObjectLabel.frame = CGRect(x: 252.5, y: 620, width: 110, height: 30)
         view.addSubview(toDrawObjectLabel)
         
         //MARK: UI for the popup view
@@ -105,10 +118,10 @@ public class GameViewController : UIViewController {
         
         //Adding the information to the popup view
         let startPopupLabel = UILabel()
-        startPopupLabel.font = UIFont(name: "SanFranciscoDisplay-Black", size: 14)
+        startPopupLabel.font = UIFont(name: "SanFranciscoDisplay-Black", size: 20)
         startPopupLabel.numberOfLines = 0
-        startPopupLabel.frame = CGRect(x: 12.5, y: 12.5, width: 345, height: 80)
-        startPopupLabel.text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+        startPopupLabel.frame = CGRect(x: 12.5, y: 5, width: 345, height: 300)
+        startPopupLabel.text = "This round, you draw! Five seconds after closing this pop-up the 💻 will start guessing. The faster it guesses correctly the more points you get! The object you have to draw is shown in the bottom right. Good luck!"
         
         informationPopUpView.addSubview(startPopupLabel)
         
@@ -132,11 +145,19 @@ public class GameViewController : UIViewController {
         
         endOfRoundClosePopUpButton.addTarget(self, action: #selector(endOfRoundClosePopUpButtonPressed), for: .touchUpInside)
         
+        //Label in the end of round popup
+        aiPopupLabel.frame = CGRect(x: 12.5, y: 30, width: 345, height: 150)
+        aiPopupLabel.font = UIFont(name: "SanFranciscoDisplay-Black", size: 25)
+        aiPopupLabel.text = ""
+        aiPopupLabel.textAlignment = .center
+        aiPopupLabel.numberOfLines = 0
+        endOfTheRoundPopupView.addSubview(aiPopupLabel)
+        
         //MARK: Rest of the UI
         //Adding a button to start the round
         let startRoundButtonImage = UIImage(named: "startButton.png") as UIImage?
         startRoundButton.setImage(startRoundButtonImage, for: .normal)
-        startRoundButton.frame = CGRect(x: 252.5, y: 570, width: 110, height: 27)
+        startRoundButton.frame = CGRect(x: 252.5, y: 620, width: 110, height: 27)
         view.addSubview(startRoundButton)
         
         startRoundButton.addTarget(self, action: #selector(startRoundButtonPressed), for: .touchUpInside)
@@ -144,7 +165,7 @@ public class GameViewController : UIViewController {
         //Adding a button clear the canvas
         let clearCanvasButtonImage = UIImage(named: "clearButton")
         clearCanvasButton.setImage(clearCanvasButtonImage, for: .normal)
-        clearCanvasButton.frame = CGRect(x: 12.5, y: 570, width: 110, height: 27)
+        clearCanvasButton.frame = CGRect(x: 12.5, y: 620, width: 110, height: 27)
         view.addSubview(clearCanvasButton)
         
         clearCanvasButton.addTarget(self, action: #selector(clearCanvasButtonPressed), for: .touchUpInside)
@@ -155,9 +176,19 @@ public class GameViewController : UIViewController {
         //Creating the drawview for the ai
         aiDrawView.backgroundColor = UIColor.white
         aiDrawView.layer.cornerRadius = 20
-        aiDrawView.frame = CGRect(x: 12.5, y: 200, width: 350, height: 350)
+        aiDrawView.frame = CGRect(x: 12.5, y: 250, width: 350, height: 350)
         
+        //Creating the text field where a user can input his guess
+        aiGuessTextBox.frame = CGRect(x: 12.5, y: 620, width: 200, height: 80)
+        aiGuessTextBox.delegate = self
+        aiGuessTextBox.layer.cornerRadius = 5
+        aiGuessTextBox.backgroundColor = .white
+        aiGuessTextBox.placeholder = "Enter your guess"
         
+        //Creating the enter button that allows users to enter their answer
+        enterButton.frame = CGRect(x: 12.5, y: 620, width: 110, height: 27)
+        let enterButtonImage = UIImage(named: "startButton")
+        enterButton.setImage(enterButtonImage, for: .normal)
     }
     
     //MARK: Functions that control the neural network requests
@@ -182,11 +213,9 @@ public class GameViewController : UIViewController {
             return
         }
         
-        print(observations)
-        
         let classification = observations
             .flatMap({ $0 as? VNClassificationObservation  })
-            .filter({$0.confidence > 0.5})                      // filter confidence > 80%
+            .filter({$0.confidence > 0.9})                      // filter confidence > 90%
             .map({$0.identifier})                               // map the identifier as answer
         
         updateLabel(with: classification.first)
@@ -250,15 +279,22 @@ public class GameViewController : UIViewController {
         UIView.animate(withDuration: 0.15) {
             self.closePopUpButton.transform = CGAffineTransform(rotationAngle: -CGFloat.pi / 2.0)
         }
-        let tenSecondsBeforeAnalyzingStarts = Timer.scheduledTimer(timeInterval: 5.0, target: self, selector: #selector(GameViewController.startAnalyzingDrawViewAfterPopUpClosed), userInfo: nil, repeats: false)
+        let fiveSecondsBeforeAnalyzingStarts = Timer.scheduledTimer(timeInterval: 5.0, target: self, selector: #selector(GameViewController.startAnalyzingDrawViewAfterPopUpClosed), userInfo: nil, repeats: false)
         
         clearCanvasButton.isHidden = false
-        
+    
+    }
+    
+    //Function that keeps track of the points
+    @objc func keepTrackOfPoints() {
+        numberOfPoints -= 1
     }
     
     @objc func startAnalyzingDrawViewAfterPopUpClosed() {
         //Creating a timer that calls the recognize function every 2 seconds to analyze the drawView
         gameTimer = Timer.scheduledTimer(timeInterval: 2.0, target: self, selector: #selector(GameViewController.startAnalyzingDrawView), userInfo: nil, repeats: true)
+        
+        pointsTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(GameViewController.keepTrackOfPoints), userInfo: nil, repeats: true)
     }
     
     //MARK: Code to animate in a popup view that shows some of the rules initially (Only in the first round when start is pressed)
@@ -305,11 +341,18 @@ public class GameViewController : UIViewController {
     func checkIfNetworkGuessedCorrectly(networkGuess: String?) {
         if toDrawObjectLabel.text == networkGuess {
             gameTimer.invalidate()
-            animateInEndPopUp()
-            hideAllUIAfterUserRound()
+            pointsTimer.invalidate()
+            transferToAiRound(correctGuess: networkGuess!, numberOfPoints: numberOfPoints)
+            roundNumber += 1
         } else {
             print("Correct object still not guessed")
         }
+    }
+    
+    @objc func transferToAiRound(correctGuess: String?, numberOfPoints: Int) {
+        aiPopupLabel.text = "I found out it was \(correctGuess!) 🎉 \n \n \n you now have \(numberOfPoints) points!"
+        animateInEndPopUp()
+        hideAllUIAfterUserRound()
     }
     
     //MARK: Code to animate in a second popup at the end of the round showing the amount of points the user got and a button to progress to the next round
@@ -348,6 +391,7 @@ public class GameViewController : UIViewController {
     
     @objc func endOfRoundClosePopUpButtonPressed() {
         animateOutEndPopUp()
+        let showAllAIUI = Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector(GameViewController.showAllUIForAIRound), userInfo: nil, repeats: false)
         showAllUIForAIRound()
         UIView.animate(withDuration: 0.15) {
             self.endOfRoundClosePopUpButton.transform = CGAffineTransform(rotationAngle: -CGFloat.pi / 2.0)
@@ -360,10 +404,36 @@ public class GameViewController : UIViewController {
         resultLabel.isHidden = true
         toDrawObjectLabel.isHidden = true
         scoreLabel.isHidden = true
+        roundLabel.isHidden = true
     }
     
-    func showAllUIForAIRound() {
+    @objc func showAllUIForAIRound() {
         self.view.addSubview(aiDrawView)
+        self.view.addSubview(aiGuessTextBox)
+        self.view.addSubview(enterButton)
+        print(numberOfPoints)
+        scoreLabel.text = "Score: \(numberOfPoints)"
+        scoreLabel.isHidden = false
+        determineRoundLabelText()
+        roundLabel.isHidden = false
+    }
+    
+    func determineRoundLabelText() {
+    if roundNumber % 2 == 0 {
+        roundLabel.text = "Round \(roundNumber), 💻 draws, 👱🏼 guesses"
+    } else {
+        roundLabel.text = "Round \(roundNumber), 👱🏼 draws, 💻 guesses."
+    }
+}
+    
+}
+
+//Extension to enable us to get the textfield inputs
+extension GameViewController : UITextFieldDelegate {
+    
+    public func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
     }
     
 }
