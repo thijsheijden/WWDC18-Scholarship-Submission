@@ -6,20 +6,33 @@ import PlaygroundSupport
 
 public class GameViewController : UIViewController {
     
+    //UI for Human drawing round
     let drawView = CanvasView()
     var request = [VNRequest]()
     let resultLabel = UILabel()
     let scoreLabel = UILabel()
     let informationPopUpView = UIView()
-    let visualEffectView = UIVisualEffectView(effect: UIBlurEffect(style: .dark))
-    var effect:UIVisualEffect!
+    let startButtonvisualEffectView = UIVisualEffectView(effect: UIBlurEffect(style: .dark))
+    var startButtonEffect:UIVisualEffect!
+    let endOfTheRoundPopupView = UIView()
+    let endOfTheRoundVisualEffectView = UIVisualEffectView(effect: UIBlurEffect(style: .dark))
+    var endOfRoundEffect:UIVisualEffect!
     let startRoundButton = UIButton()
     let clearCanvasButton = UIButton()
     let closePopUpButton = UIButton()
+    let endOfRoundClosePopUpButton = UIButton()
+    var toDrawObject = ""
+    let toDrawObjectLabel = UILabel()
+    let objectNames = ["iphone", "macbook", "apple"]
+    var gameTimer = Timer()
+    
+    //UI for AI drawing round
+    let startAIRoundButton = UIButton()
+    let aiDrawView = UIView()
     
     public override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         setupCoreMLRequest()
         
         print("view loaded")
@@ -64,13 +77,19 @@ public class GameViewController : UIViewController {
         drawView.layer.cornerRadius = 20
         view.addSubview(drawView)
         
-        //MARK: UI for the popup view
-        effect = visualEffectView.effect
-        visualEffectView.effect = nil
+        //Adding the label that displays the object that should be drawn
+        toDrawObjectLabel.text = ""
+        toDrawObjectLabel.font = UIFont(name: "SanFranciscoDisplay-Black", size: 20)
+        toDrawObjectLabel.frame = CGRect(x: 252.5, y: 570, width: 110, height: 30)
+        view.addSubview(toDrawObjectLabel)
         
-        visualEffectView.effect = nil
-        visualEffectView.frame = CGRect(x: 0, y: 0, width: 375, height: 667)
-        view.addSubview(visualEffectView)
+        //MARK: UI for the popup view
+        startButtonEffect = startButtonvisualEffectView.effect
+        startButtonvisualEffectView.effect = nil
+        
+        startButtonvisualEffectView.effect = nil
+        startButtonvisualEffectView.frame = CGRect(x: 0, y: 0, width: 375, height: 667)
+        view.addSubview(startButtonvisualEffectView)
         
         informationPopUpView.layer.cornerRadius = 5
         informationPopUpView.frame = CGRect(x: 12.5, y: 250, width: 360, height: 300)
@@ -84,6 +103,36 @@ public class GameViewController : UIViewController {
         
         closePopUpButton.addTarget(self, action: #selector(closePopUpButtonPressed), for: .touchUpInside)
         
+        //Adding the information to the popup view
+        let startPopupLabel = UILabel()
+        startPopupLabel.font = UIFont(name: "SanFranciscoDisplay-Black", size: 14)
+        startPopupLabel.numberOfLines = 0
+        startPopupLabel.frame = CGRect(x: 12.5, y: 12.5, width: 345, height: 80)
+        startPopupLabel.text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+        
+        informationPopUpView.addSubview(startPopupLabel)
+        
+        //MARK: Creating the UI for the popup notification that appears when the network guesses correctly
+        endOfRoundEffect = endOfTheRoundVisualEffectView.effect
+        endOfTheRoundVisualEffectView.effect = nil
+        
+        endOfTheRoundVisualEffectView.effect = nil
+        endOfTheRoundVisualEffectView.frame = CGRect(x: 0, y: 0, width: 375, height: 667)
+        view.addSubview(endOfTheRoundVisualEffectView)
+        
+        endOfTheRoundPopupView.layer.cornerRadius = 5
+        endOfTheRoundPopupView.frame = CGRect(x: 12.5, y: 250, width: 360, height: 300)
+        endOfTheRoundPopupView.backgroundColor = .white
+        
+        //Adding the close button to end of the round popup view
+        let endOfRoundClosePopUpButtonImage = UIImage(named: "closeButton.png") as UIImage?
+        endOfRoundClosePopUpButton.setImage(endOfRoundClosePopUpButtonImage, for: .normal)
+        endOfRoundClosePopUpButton.frame = CGRect(x: 150, y: 230, width: 60, height: 60)
+        endOfTheRoundPopupView.addSubview(endOfRoundClosePopUpButton)
+        
+        endOfRoundClosePopUpButton.addTarget(self, action: #selector(endOfRoundClosePopUpButtonPressed), for: .touchUpInside)
+        
+        //MARK: Rest of the UI
         //Adding a button to start the round
         let startRoundButtonImage = UIImage(named: "startButton.png") as UIImage?
         startRoundButton.setImage(startRoundButtonImage, for: .normal)
@@ -99,6 +148,15 @@ public class GameViewController : UIViewController {
         view.addSubview(clearCanvasButton)
         
         clearCanvasButton.addTarget(self, action: #selector(clearCanvasButtonPressed), for: .touchUpInside)
+        
+        
+        
+        //MARK: Creating the UI for the AI round where the user has to guess what the AI is drawing
+        //Creating the drawview for the ai
+        aiDrawView.backgroundColor = UIColor.white
+        aiDrawView.layer.cornerRadius = 20
+        aiDrawView.frame = CGRect(x: 12.5, y: 200, width: 350, height: 350)
+        
         
     }
     
@@ -128,7 +186,7 @@ public class GameViewController : UIViewController {
         
         let classification = observations
             .flatMap({ $0 as? VNClassificationObservation  })
-            .filter({$0.confidence > 0.8})                      // filter confidence > 80%
+            .filter({$0.confidence > 0.5})                      // filter confidence > 80%
             .map({$0.identifier})                               // map the identifier as answer
         
         updateLabel(with: classification.first)
@@ -160,21 +218,24 @@ public class GameViewController : UIViewController {
         DispatchQueue.main.async {
             self.resultLabel.text = "I see \(text!)"
         }
+        checkIfNetworkGuessedCorrectly(networkGuess: text!)
     }
     
     //Function that calls the recognize fuction every 2 seconds
     @objc func startAnalyzingDrawView() {
         recognize()
         print("Started the 2 second interval")
+
     }
     
     //MARK: Buttons
     @objc func startRoundButtonPressed() {
-        //Creating a timer that calls the recognize function every 2 seconds to analyze the drawView
-        //var gameTimer = Timer.scheduledTimer(timeInterval: 2.0, target: self, selector: #selector(GameViewController.startAnalyzingDrawView), userInfo: nil, repeats: true)
         //startAnalyzingDrawView()
-        print("start button pressed")
         animateIn()
+        var i = Int(arc4random_uniform(UInt32(objectNames.count)))
+        var toDrawObject = objectNames[i]
+        
+        toDrawObjectLabel.text = "\(toDrawObject)"
     }
     
     //Clear the canvas when the clear button is pressed
@@ -189,6 +250,15 @@ public class GameViewController : UIViewController {
         UIView.animate(withDuration: 0.15) {
             self.closePopUpButton.transform = CGAffineTransform(rotationAngle: -CGFloat.pi / 2.0)
         }
+        let tenSecondsBeforeAnalyzingStarts = Timer.scheduledTimer(timeInterval: 5.0, target: self, selector: #selector(GameViewController.startAnalyzingDrawViewAfterPopUpClosed), userInfo: nil, repeats: false)
+        
+        clearCanvasButton.isHidden = false
+        
+    }
+    
+    @objc func startAnalyzingDrawViewAfterPopUpClosed() {
+        //Creating a timer that calls the recognize function every 2 seconds to analyze the drawView
+        gameTimer = Timer.scheduledTimer(timeInterval: 2.0, target: self, selector: #selector(GameViewController.startAnalyzingDrawView), userInfo: nil, repeats: true)
     }
     
     //MARK: Code to animate in a popup view that shows some of the rules initially (Only in the first round when start is pressed)
@@ -205,7 +275,7 @@ public class GameViewController : UIViewController {
         informationPopUpView.alpha = 0
         
         UIView.animate(withDuration: 0.4) {
-            self.visualEffectView.effect = self.effect
+            self.startButtonvisualEffectView.effect = self.startButtonEffect
             self.informationPopUpView.alpha = 1
             self.informationPopUpView.transform = CGAffineTransform.identity
         }
@@ -218,11 +288,82 @@ public class GameViewController : UIViewController {
             self.informationPopUpView.transform = CGAffineTransform.init(scaleX: 1.5, y: 1.5)
             self.informationPopUpView.alpha = 0
             
-            self.visualEffectView.effect = nil
+            self.startButtonvisualEffectView.effect = nil
             
         }) { (success:Bool) in
             self.informationPopUpView.removeFromSuperview()
         }
+        let bringDrawViewToFront = Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector(GameViewController.bringDrawViewToFront), userInfo: nil, repeats: false)
+        
+        
+    }
+    
+    @objc func bringDrawViewToFront() {
+        self.view.bringSubview(toFront: drawView)
     }
 
+    func checkIfNetworkGuessedCorrectly(networkGuess: String?) {
+        if toDrawObjectLabel.text == networkGuess {
+            gameTimer.invalidate()
+            animateInEndPopUp()
+            hideAllUIAfterUserRound()
+        } else {
+            print("Correct object still not guessed")
+        }
+    }
+    
+    //MARK: Code to animate in a second popup at the end of the round showing the amount of points the user got and a button to progress to the next round
+    
+    //Function that animates the appearing of the end of the round popup view
+    func animateInEndPopUp() {
+        
+        self.view.addSubview(endOfTheRoundPopupView)
+        endOfTheRoundPopupView.center = self.view.center
+        
+        endOfTheRoundPopupView.transform = CGAffineTransform.init(scaleX: 1.5, y: 1.5)
+        endOfTheRoundPopupView.alpha = 0
+        
+        UIView.animate(withDuration: 0.4) {
+            self.endOfTheRoundVisualEffectView.effect = self.endOfRoundEffect
+            self.endOfTheRoundPopupView.alpha = 1
+            self.endOfTheRoundPopupView.transform = CGAffineTransform.identity
+        }
+        print("popup View added")
+    }
+    
+    //Function that animates the disapearance of the end of the round popup view
+    func animateOutEndPopUp () {
+        UIView.animate(withDuration: 0.4, animations: {
+            self.endOfTheRoundPopupView.transform = CGAffineTransform.init(scaleX: 1.5, y: 1.5)
+            self.endOfTheRoundPopupView.alpha = 0
+            
+            self.endOfTheRoundVisualEffectView.effect = nil
+            
+        }) { (success:Bool) in
+            self.endOfTheRoundPopupView.removeFromSuperview()
+        }
+        
+        
+    }
+    
+    @objc func endOfRoundClosePopUpButtonPressed() {
+        animateOutEndPopUp()
+        showAllUIForAIRound()
+        UIView.animate(withDuration: 0.15) {
+            self.endOfRoundClosePopUpButton.transform = CGAffineTransform(rotationAngle: -CGFloat.pi / 2.0)
+        }
+    }
+    
+    func hideAllUIAfterUserRound() {
+        drawView.isHidden = true
+        clearCanvasButton.isHidden = true
+        resultLabel.isHidden = true
+        toDrawObjectLabel.isHidden = true
+        scoreLabel.isHidden = true
+    }
+    
+    func showAllUIForAIRound() {
+        self.view.addSubview(aiDrawView)
+    }
+    
 }
