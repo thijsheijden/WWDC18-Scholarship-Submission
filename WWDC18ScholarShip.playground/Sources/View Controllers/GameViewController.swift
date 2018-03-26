@@ -26,6 +26,7 @@ public class GameViewController : UIViewController {
     let objectNames = ["iPhone", "MacBook", "Apple", "Watch", "HomePod", "iPhone X", "Swift", "iPod"]
     var gameTimer = Timer()
     var numberOfPoints = 100
+    var currentScore = 0
     var pointsTimer = Timer()
     let roundLabel = UILabel()
     var roundNumber = 1
@@ -34,8 +35,10 @@ public class GameViewController : UIViewController {
     let startAIRoundButton = UIButton()
     let aiDrawView = UIView()
     let aiPopupLabel = UILabel()
-    let aiGuessTextBox = UITextField()
-    let enterButton = UIButton()
+    let guessOneButton = UIButton()
+    let guessTwoButton = UIButton()
+    let guessThreeButton = UIButton()
+    let infoLabel = UILabel()
     
     public override func viewDidLoad() {
         super.viewDidLoad()
@@ -176,19 +179,41 @@ public class GameViewController : UIViewController {
         //Creating the drawview for the ai
         aiDrawView.backgroundColor = UIColor.white
         aiDrawView.layer.cornerRadius = 20
-        aiDrawView.frame = CGRect(x: 12.5, y: 250, width: 350, height: 350)
+        aiDrawView.frame = CGRect(x: 12.5, y: 200, width: 350, height: 350)
         
-        //Creating the text field where a user can input his guess
-        aiGuessTextBox.frame = CGRect(x: 12.5, y: 620, width: 200, height: 80)
-        aiGuessTextBox.delegate = self
-        aiGuessTextBox.layer.cornerRadius = 5
-        aiGuessTextBox.backgroundColor = .white
-        aiGuessTextBox.placeholder = "Enter your guess"
+        //Creating three buttons that all have a different option, the user gets one chance to choose the correct answer, the faster they choose the more points they get
+        //Button 1
+        guessOneButton.frame = CGRect(x: 12.5, y: 570, width: 100, height: 50)
+        guessOneButton.backgroundColor = .white
+        guessOneButton.layer.cornerRadius = 20
+        guessOneButton.setTitle("\(objectNames[Int(arc4random_uniform(UInt32(objectNames.count)))])", for: .normal)
+        guessOneButton.titleLabel?.font = UIFont(name: "SanFranciscoDisplay-Black", size: 15)
+        guessOneButton.setTitleColor(.black, for: .normal)
         
-        //Creating the enter button that allows users to enter their answer
-        enterButton.frame = CGRect(x: 12.5, y: 620, width: 110, height: 27)
-        let enterButtonImage = UIImage(named: "startButton")
-        enterButton.setImage(enterButtonImage, for: .normal)
+        //Button 2
+        guessTwoButton.frame = CGRect(x: 132.5, y: 570, width: 100, height: 50)
+        guessTwoButton.backgroundColor = .white
+        guessTwoButton.layer.cornerRadius = 20
+        guessTwoButton.setTitle("\(objectNames[Int(arc4random_uniform(UInt32(objectNames.count)))])", for: .normal)
+        guessTwoButton.titleLabel?.font = UIFont(name: "SanFranciscoDisplay-Black", size: 15)
+        guessTwoButton.setTitleColor(.black, for: .normal)
+        
+        //Button 3
+        guessThreeButton.frame = CGRect(x: 252.5, y: 570, width: 100, height: 50)
+        guessThreeButton.backgroundColor = .white
+        guessThreeButton.layer.cornerRadius = 20
+        guessThreeButton.setTitle("\(objectNames[Int(arc4random_uniform(UInt32(objectNames.count)))])", for: .normal)
+        guessThreeButton.titleLabel?.font = UIFont(name: "SanFranciscoDisplay-Black", size: 15)
+        guessThreeButton.setTitleColor(.black, for: .normal)
+        
+//        guessThreeButton.addTarget(self, action: #selector(drawForm), for: .touchUpInside)
+        
+        //Creating the label that gives some information about that round
+        infoLabel.frame = CGRect(x: 12.5, y: 45, width: 362.5, height: 150)
+        infoLabel.text = "This round the 💻 will draw. One chance to chose. \n faster ➡️ more points"
+        infoLabel.font = UIFont(name: "SanFranciscoDisplay-Black", size: 25)
+        infoLabel.textAlignment = .center
+        infoLabel.numberOfLines = 0
     }
     
     //MARK: Functions that control the neural network requests
@@ -409,9 +434,11 @@ public class GameViewController : UIViewController {
     
     @objc func showAllUIForAIRound() {
         self.view.addSubview(aiDrawView)
-        self.view.addSubview(aiGuessTextBox)
-        self.view.addSubview(enterButton)
-        print(numberOfPoints)
+        self.view.addSubview(guessOneButton)
+        self.view.addSubview(guessTwoButton)
+        self.view.addSubview(guessThreeButton)
+        self.view.addSubview(infoLabel)
+        currentScore = currentScore + numberOfPoints
         scoreLabel.text = "Score: \(numberOfPoints)"
         scoreLabel.isHidden = false
         determineRoundLabelText()
@@ -426,14 +453,34 @@ public class GameViewController : UIViewController {
     }
 }
     
-}
-
-//Extension to enable us to get the textfield inputs
-extension GameViewController : UITextFieldDelegate {
-    
-    public func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        textField.resignFirstResponder()
-        return true
-    }
+//    //THIS SHIT DOESNT WORK FUCKING HELL
+//    @objc func drawForm() {
+//        var macbookPath = Forms.MacbookForm()
+//        let shapeLayer = CAShapeLayer()
+//        shapeLayer.strokeColor = UIColor.black.cgColor
+//        shapeLayer.fillColor = UIColor.clear.cgColor
+//        shapeLayer.bounds = aiDrawView.bounds
+//        
+//        var paths: [UIBezierPath] = macbookPath
+//        
+//        guard let path = paths.first else {
+//            return
+//        }
+//        
+//        paths.dropFirst()
+//            .forEach {
+//                path.append($0)
+//            }
+//        
+//        
+//        shapeLayer.path = path.cgPath
+//        self.view.layer.addSublayer(shapeLayer)
+//        
+//        let strokeEndAnimation = CABasicAnimation(keyPath: "strokeEnd")
+//        strokeEndAnimation.duration = 2.0
+//        strokeEndAnimation.fromValue = 0.0
+//        strokeEndAnimation.toValue = 1.0
+//        shapeLayer.add(strokeEndAnimation, forKey: nil)
+//    }
     
 }
