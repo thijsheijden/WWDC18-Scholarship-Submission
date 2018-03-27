@@ -4,6 +4,8 @@ import Vision
 import UIKit
 import PlaygroundSupport
 
+/*TODO: Add more animations to show the user their answer is correct, Chechmark in screen for instance. Show the users point better. Clear button is weird and not easy to understand what its used for. Buttons in the AI round should have a different font to make them easier to differentiate from the others.*/
+
 public class GameViewController : UIViewController {
     
     //UI for Human drawing round
@@ -23,13 +25,17 @@ public class GameViewController : UIViewController {
     let endOfRoundClosePopUpButton = UIButton()
     var toDrawObject = ""
     let toDrawObjectLabel = UILabel()
-    let objectNames = ["iPhone", "MacBook", "Apple", "Watch", "HomePod", "iPhone X", "Swift", "iPod"]
+    var objectNames = ["iPhone", "MacBook", "Apple", "Watch", "HomePod", "iPhone X", "Swift", "iPod"]
     var gameTimer = Timer()
-    var numberOfPoints = 100
+    var numberOfPoints = 0
+    var numberOfSeconds = 100
     var currentScore = 0
     var pointsTimer = Timer()
     let roundLabel = UILabel()
     var roundNumber = 1
+    var o = 0
+    //Should be removed
+    var numberOfTimesRan = 0
     
     //UI for AI drawing round
     let startAIRoundButton = UIButton()
@@ -39,6 +45,13 @@ public class GameViewController : UIViewController {
     let guessTwoButton = UIButton()
     let guessThreeButton = UIButton()
     let infoLabel = UILabel()
+    let reloadButtonLabelsButton = UIButton()
+    var aiRoundTimer = Timer()
+    var formNames = ["iPhone", "Apple", "Swift", "Watch", "MacBook"]
+    var actualFormNamesFromFormClass = [Forms.iPhoneForm, Forms.AppleForm, Forms.swiftBirdForm, Forms.watchForm, Forms.macForm]
+    var i = 0
+    var shapeLayer = CAShapeLayer()
+    let strokeEndAnimation = CABasicAnimation(keyPath: "strokeEnd")
     
     public override func viewDidLoad() {
         super.viewDidLoad()
@@ -63,12 +76,13 @@ public class GameViewController : UIViewController {
         //Setting up the initial view
         let view = UIView()
         self.view = view
-        view.backgroundColor = yellowColor
+        view.backgroundColor = .lightGray
+//        view.backgroundColor = yellowColor
         
         //Creating a label that displays the users score
         scoreLabel.text = "Score: 0"
         scoreLabel.textAlignment = .right
-        scoreLabel.frame = CGRect(x: 275, y: 12.5, width: 80, height: 50)
+        scoreLabel.frame = CGRect(x: 250, y: 12.5, width: 120, height: 50)
         scoreLabel.font = UIFont(name: "SanFranciscoDisplay-Black", size: 18)
         view.addSubview(scoreLabel)
         
@@ -186,32 +200,47 @@ public class GameViewController : UIViewController {
         guessOneButton.frame = CGRect(x: 12.5, y: 570, width: 100, height: 50)
         guessOneButton.backgroundColor = .white
         guessOneButton.layer.cornerRadius = 20
-        guessOneButton.setTitle("\(objectNames[Int(arc4random_uniform(UInt32(objectNames.count)))])", for: .normal)
+        guessOneButton.setTitle("\(formNames[Int(arc4random_uniform(UInt32(formNames.count)))])", for: .normal)
         guessOneButton.titleLabel?.font = UIFont(name: "SanFranciscoDisplay-Black", size: 15)
         guessOneButton.setTitleColor(.black, for: .normal)
         
+        guessOneButton.addTarget(self, action: #selector(checkIfButtonPressedIsCorrectAnswer), for: .touchUpInside)
         //Button 2
         guessTwoButton.frame = CGRect(x: 132.5, y: 570, width: 100, height: 50)
         guessTwoButton.backgroundColor = .white
         guessTwoButton.layer.cornerRadius = 20
-        guessTwoButton.setTitle("\(objectNames[Int(arc4random_uniform(UInt32(objectNames.count)))])", for: .normal)
+        guessTwoButton.setTitle("\(formNames[Int(arc4random_uniform(UInt32(formNames.count)))])", for: .normal)
         guessTwoButton.titleLabel?.font = UIFont(name: "SanFranciscoDisplay-Black", size: 15)
         guessTwoButton.setTitleColor(.black, for: .normal)
         
+        guessTwoButton.addTarget(self, action: #selector(checkIfButtonPressedIsCorrectAnswer), for: .touchUpInside)
         //Button 3
         guessThreeButton.frame = CGRect(x: 252.5, y: 570, width: 100, height: 50)
         guessThreeButton.backgroundColor = .white
         guessThreeButton.layer.cornerRadius = 20
-        guessThreeButton.setTitle("\(objectNames[Int(arc4random_uniform(UInt32(objectNames.count)))])", for: .normal)
         guessThreeButton.titleLabel?.font = UIFont(name: "SanFranciscoDisplay-Black", size: 15)
         guessThreeButton.setTitleColor(.black, for: .normal)
+        guessThreeButton.setTitle("\(formNames[Int(arc4random_uniform(UInt32(formNames.count)))])", for: .normal)
         
-//        guessThreeButton.addTarget(self, action: #selector(drawForm), for: .touchUpInside)
+        guessThreeButton.addTarget(self, action: #selector(checkIfButtonPressedIsCorrectAnswer), for: .touchUpInside)
+        //Creating a button that reloads the button labels so that a button with the correct label can be found
+        reloadButtonLabelsButton.setTitle("🔁", for: .normal)
+        reloadButtonLabelsButton.titleLabel?.font = UIFont(name: "SanFranciscoDisplay-Black", size: 25)
+        reloadButtonLabelsButton.frame = CGRect(x: 162.5, y: 620, width: 50, height: 50)
+        
+        reloadButtonLabelsButton.addTarget(self, action: #selector(setButtonLabels), for: .touchUpInside)
+        
+        //Creating the start button
+        startAIRoundButton.setTitle("▶️", for: .normal)
+        startAIRoundButton.titleLabel?.font = UIFont(name: "SanFranciscoDisplay-Black", size: 25)
+        startAIRoundButton.frame = CGRect(x: 162.5, y: 620, width: 50, height: 50)
+        
+        startAIRoundButton.addTarget(self, action: #selector(startAiRoundButtonPressed), for: .touchUpInside)
         
         //Creating the label that gives some information about that round
         infoLabel.frame = CGRect(x: 12.5, y: 45, width: 362.5, height: 150)
-        infoLabel.text = "This round the 💻 will draw. One chance to chose. \n faster ➡️ more points"
-        infoLabel.font = UIFont(name: "SanFranciscoDisplay-Black", size: 25)
+        infoLabel.text = "Press ▶️ to start the round!"
+        infoLabel.font = UIFont(name: "SanFranciscoDisplay-Black", size: 18)
         infoLabel.textAlignment = .center
         infoLabel.numberOfLines = 0
     }
@@ -279,17 +308,23 @@ public class GameViewController : UIViewController {
     @objc func startAnalyzingDrawView() {
         recognize()
         print("Started the 2 second interval")
-
     }
     
     //MARK: Buttons
     @objc func startRoundButtonPressed() {
-        //startAnalyzingDrawView()
-        animateIn()
-        var i = Int(arc4random_uniform(UInt32(objectNames.count)))
-        var toDrawObject = objectNames[i]
-        
-        toDrawObjectLabel.text = "\(toDrawObject)"
+        if roundNumber == 1 {
+            animateIn()
+            o = Int(arc4random_uniform(UInt32(objectNames.count)))
+            var toDrawObject = objectNames[o]
+            toDrawObjectLabel.text = "\(toDrawObject)"
+        } else {
+            o = Int(arc4random_uniform(UInt32(objectNames.count)))
+            var toDrawObject = objectNames[o]
+            toDrawObjectLabel.text = "\(toDrawObject)"
+            startRoundButton.isHidden = true
+            toDrawObjectLabel.isHidden = false
+            let fiveSecondsBeforeAnalyzingStarts = Timer.scheduledTimer(timeInterval: 5.0, target: self, selector: #selector(GameViewController.startAnalyzingDrawViewAfterPopUpClosed), userInfo: nil, repeats: false)
+        }
     }
     
     //Clear the canvas when the clear button is pressed
@@ -312,7 +347,7 @@ public class GameViewController : UIViewController {
     
     //Function that keeps track of the points
     @objc func keepTrackOfPoints() {
-        numberOfPoints -= 1
+        numberOfSeconds -= 1
     }
     
     @objc func startAnalyzingDrawViewAfterPopUpClosed() {
@@ -367,17 +402,26 @@ public class GameViewController : UIViewController {
         if toDrawObjectLabel.text == networkGuess {
             gameTimer.invalidate()
             pointsTimer.invalidate()
-            transferToAiRound(correctGuess: networkGuess!, numberOfPoints: numberOfPoints)
+            numberOfPoints = numberOfSeconds
+            transferToAiRound(correctGuess: networkGuess!)
             roundNumber += 1
+            objectNames.remove(at: o)
         } else {
             print("Correct object still not guessed")
         }
     }
     
-    @objc func transferToAiRound(correctGuess: String?, numberOfPoints: Int) {
-        aiPopupLabel.text = "I found out it was \(correctGuess!) 🎉 \n \n \n you now have \(numberOfPoints) points!"
-        animateInEndPopUp()
-        hideAllUIAfterUserRound()
+    @objc func transferToAiRound(correctGuess: String?) {
+        if roundNumber == 1 {
+            aiPopupLabel.text = "I found out it was \(correctGuess!) 🎉 \n \n \n you now have \(numberOfPoints) points!"
+            animateInEndPopUp()
+            hideAllUIAfterUserRound()
+        } else {
+            aiPopupLabel.text = "I found out it was \(correctGuess!) 🎉 \n \n \n you now have \(currentScore) points!"
+            animateInEndPopUp()
+            hideAllUIAfterUserRound()
+        }
+        
     }
     
     //MARK: Code to animate in a second popup at the end of the round showing the amount of points the user got and a button to progress to the next round
@@ -417,13 +461,13 @@ public class GameViewController : UIViewController {
     @objc func endOfRoundClosePopUpButtonPressed() {
         animateOutEndPopUp()
         let showAllAIUI = Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector(GameViewController.showAllUIForAIRound), userInfo: nil, repeats: false)
-        showAllUIForAIRound()
         UIView.animate(withDuration: 0.15) {
             self.endOfRoundClosePopUpButton.transform = CGAffineTransform(rotationAngle: -CGFloat.pi / 2.0)
         }
     }
     
     func hideAllUIAfterUserRound() {
+        drawView.clearCanvas()
         drawView.isHidden = true
         clearCanvasButton.isHidden = true
         resultLabel.isHidden = true
@@ -433,17 +477,41 @@ public class GameViewController : UIViewController {
     }
     
     @objc func showAllUIForAIRound() {
+        if roundNumber == 2 {
         self.view.addSubview(aiDrawView)
         self.view.addSubview(guessOneButton)
         self.view.addSubview(guessTwoButton)
         self.view.addSubview(guessThreeButton)
         self.view.addSubview(infoLabel)
-        currentScore = currentScore + numberOfPoints
-        scoreLabel.text = "Score: \(numberOfPoints)"
+        self.view.addSubview(startAIRoundButton)
+            
+        guessOneButton.isEnabled = false
+        guessTwoButton.isEnabled = false
+        guessThreeButton.isEnabled = false
+        currentScore += numberOfPoints
+        print(currentScore)
+        scoreLabel.text = "Score: \(currentScore)"
+        scoreLabel.isHidden = false
+        determineRoundLabelText()
+        roundLabel.isHidden = false
+        } else {
+        aiDrawView.isHidden = false
+        guessOneButton.isHidden = false
+        guessTwoButton.isHidden = false
+        guessThreeButton.isHidden = false
+        infoLabel.isHidden = false
+        startAIRoundButton.isHidden = false
+        guessOneButton.isEnabled = false
+        guessTwoButton.isEnabled = false
+        guessThreeButton.isEnabled = false
+        currentScore += numberOfPoints
+        print(currentScore)
+        scoreLabel.text = "Score: \(currentScore)"
         scoreLabel.isHidden = false
         determineRoundLabelText()
         roundLabel.isHidden = false
     }
+}
     
     func determineRoundLabelText() {
     if roundNumber % 2 == 0 {
@@ -453,34 +521,127 @@ public class GameViewController : UIViewController {
     }
 }
     
-//    //THIS SHIT DOESNT WORK FUCKING HELL
-//    @objc func drawForm() {
-//        var macbookPath = Forms.MacbookForm()
-//        let shapeLayer = CAShapeLayer()
-//        shapeLayer.strokeColor = UIColor.black.cgColor
-//        shapeLayer.fillColor = UIColor.clear.cgColor
-//        shapeLayer.bounds = aiDrawView.bounds
-//        
-//        var paths: [UIBezierPath] = macbookPath
-//        
-//        guard let path = paths.first else {
-//            return
-//        }
-//        
-//        paths.dropFirst()
-//            .forEach {
-//                path.append($0)
-//            }
-//        
-//        
-//        shapeLayer.path = path.cgPath
-//        self.view.layer.addSublayer(shapeLayer)
-//        
-//        let strokeEndAnimation = CABasicAnimation(keyPath: "strokeEnd")
-//        strokeEndAnimation.duration = 2.0
-//        strokeEndAnimation.fromValue = 0.0
-//        strokeEndAnimation.toValue = 1.0
-//        shapeLayer.add(strokeEndAnimation, forKey: nil)
-//    }
+    //MARK: Function that draws the shape on the aidrawView
+    @objc func drawForm() {
+        i = Int(arc4random_uniform(UInt32(formNames.count)))
+        var drawPath = actualFormNamesFromFormClass[i]
+        shapeLayer.fillColor = UIColor.clear.cgColor
+        shapeLayer.strokeColor = UIColor.black.cgColor
+        shapeLayer.lineWidth = 6
+        shapeLayer.frame = CGRect(x: -115, y: 280, width: 350, height: 350)
+        
+        var paths: [UIBezierPath] = drawPath()
+        let shapeBounds = shapeLayer.bounds
+        let mirror = CGAffineTransform(scaleX: 1,
+                                       y: -1)
+        let translate = CGAffineTransform(translationX: 0,
+                                          y: shapeBounds.size.height)
+        let concatenated = mirror.concatenating(translate)
+        
+        for path in paths {
+            path.apply(concatenated)
+        }
+        
+        guard let path = paths.first else {
+            return
+        }
+        
+        paths.dropFirst()
+            .forEach {
+                path.append($0)
+        }
+        
+        shapeLayer.transform = CATransform3DMakeScale(0.6, 0.6, 0)
+        shapeLayer.path = path.cgPath
+        
+        self.view.layer.addSublayer(shapeLayer)
+        
+        strokeEndAnimation.duration = 30.0
+        strokeEndAnimation.fromValue = 0.0
+        strokeEndAnimation.toValue = 1.0
+        shapeLayer.add(strokeEndAnimation, forKey: nil)
+    }
+    
+    @objc func setButtonLabels() {
+        guessOneButton.setTitle("\(formNames[Int(arc4random_uniform(UInt32(formNames.count)))])", for: .normal)
+        guessTwoButton.setTitle("\(formNames[Int(arc4random_uniform(UInt32(formNames.count)))])", for: .normal)
+        guessThreeButton.setTitle("\(formNames[Int(arc4random_uniform(UInt32(formNames.count)))])", for: .normal)
+    }
+    
+    @objc func startAiRoundButtonPressed() {
+        if roundNumber == 2 {
+            startAIRoundButton.isHidden = true
+            self.view.addSubview(reloadButtonLabelsButton)
+            guessOneButton.isEnabled = true
+            guessTwoButton.isEnabled = true
+            guessThreeButton.isEnabled = true
+            infoLabel.text = "Press 🔁 to get new buttons. \n You have one chance to choose the correct one!"
+            drawForm()
+            numberOfSeconds = 100
+            aiRoundTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(GameViewController.keepTrackOfPoints), userInfo: nil, repeats: true)
+        } else {
+            startAIRoundButton.isHidden = true
+            reloadButtonLabelsButton.isHidden = false
+            guessOneButton.isEnabled = true
+            guessTwoButton.isEnabled = true
+            guessThreeButton.isEnabled = true
+            infoLabel.text = "Press 🔁 to get new buttons. \n You have one chance to choose the correct one!"
+            drawForm()
+            numberOfSeconds = 100
+            aiRoundTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(GameViewController.keepTrackOfPoints), userInfo: nil, repeats: true)
+        }
+       
+    }
+    
+    @objc func checkIfButtonPressedIsCorrectAnswer(sender: UIButton) {
+        let buttonPressed = sender
+        let buttonTitle = buttonPressed.titleLabel!.text!
+        print(buttonTitle)
+        if buttonTitle == formNames[i] {
+            aiRoundTimer.invalidate()
+            print("Correct!")
+            print(formNames)
+            roundNumber += 1
+            numberOfPoints = numberOfSeconds
+            print(numberOfPoints)
+            currentScore += numberOfPoints
+            scoreLabel.text = "Score: \(currentScore)"
+            guessOneButton.isEnabled = false
+            guessTwoButton.isEnabled = false
+            guessThreeButton.isEnabled = false
+            //Remove the CGPath from View
+            let timerUntilSwitchToHumanRound = Timer.scheduledTimer(timeInterval: 2.5, target: self, selector: #selector(GameViewController.showAllHumanAIAndHideAllAiUI), userInfo: nil, repeats: false)
+        } else {
+            aiRoundTimer.invalidate()
+            print("Wrong!")
+        }
+    }
+    
+    @objc func showAllHumanAIAndHideAllAiUI() {
+        if roundNumber > 6 {
+            print("End of the game")
+        } else {
+            //Show all the Human Ai UI
+            resultLabel.isHidden = false
+            drawView.isHidden = false
+            clearCanvasButton.isHidden = false
+            toDrawObjectLabel.isHidden = true
+            startRoundButton.isHidden = false
+            scoreLabel.isHidden = false
+            roundLabel.isHidden = false
+            determineRoundLabelText()
+            resultLabel.text = "💻 doesn't see anything yet..."
+            
+            //Hide all the ai ui
+            infoLabel.isHidden = true
+            aiDrawView.isHidden = true
+            guessOneButton.isHidden = true
+            guessTwoButton.isHidden = true
+            guessThreeButton.isHidden = true
+            reloadButtonLabelsButton.isHidden = true
+            startAIRoundButton.isHidden = true
+            self.shapeLayer.removeFromSuperlayer()
+        }
+    }
     
 }

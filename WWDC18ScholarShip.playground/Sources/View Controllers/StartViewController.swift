@@ -11,7 +11,7 @@ public class StartViewController : UIViewController {
         let yellowColor = UIColor(red:1.00, green:0.92, blue:0.23, alpha:1.0)
         
         self.view = view
-        view.backgroundColor = yellowColor
+        view.backgroundColor = .lightGray
         
         //MARK: Creating question button
         let questionButton = UIButton()

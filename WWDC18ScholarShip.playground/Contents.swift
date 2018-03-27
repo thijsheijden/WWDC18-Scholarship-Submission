@@ -2,5 +2,5 @@ import UIKit
 import PlaygroundSupport
 
 // Present the view controller in the Live View window
-PlaygroundPage.current.liveView =  DrawingViewController()
+PlaygroundPage.current.liveView =  StartViewController()
 

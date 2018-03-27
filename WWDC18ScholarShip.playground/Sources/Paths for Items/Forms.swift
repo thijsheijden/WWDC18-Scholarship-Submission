@@ -4,6 +4,8 @@ import SpriteKit
 ///Has methods to create Forms, which are built up of UIBezierPaths
 open class Forms {
 
+    
+    
     public class func CircleForm(radius:CGFloat) -> [UIBezierPath] {
         
         let frame = CGRect(x: 0, y: 0, width: 800, height: 600)
@@ -21,6 +23,7 @@ open class Forms {
     public class func AppleForm() -> [UIBezierPath] {
         
         var forms : [UIBezierPath] = []
+
         //Apple
         let applePath = UIBezierPath()
         applePath.move(to: CGPoint(x: 231.78, y: 253.81))
@@ -50,43 +53,6 @@ open class Forms {
         
         forms.append(leafPath)
         
-        return forms
-    }
-    
-    public class func negativeApple() -> [UIBezierPath] {
-        
-        var forms : [UIBezierPath] = []
-        
-        let negativeApplePath = UIBezierPath()
-        negativeApplePath.move(to: CGPoint(x: 461.5, y: 503.5))
-        negativeApplePath.addCurve(to: CGPoint(x: 413.5, y: 473.5), controlPoint1: CGPoint(x: 461.5, y: 503.5), controlPoint2: CGPoint(x: 425.5, y: 492.5))
-        negativeApplePath.addCurve(to: CGPoint(x: 396.2, y: 421.98), controlPoint1: CGPoint(x: 401.5, y: 454.5), controlPoint2: CGPoint(x: 396.2, y: 421.98))
-        negativeApplePath.addCurve(to: CGPoint(x: 448.5, y: 450.5), controlPoint1: CGPoint(x: 396.2, y: 421.98), controlPoint2: CGPoint(x: 432.5, y: 430.5))
-        negativeApplePath.addCurve(to: CGPoint(x: 461.5, y: 503.5), controlPoint1: CGPoint(x: 464.5, y: 470.5), controlPoint2: CGPoint(x: 461.5, y: 503.5))
-        negativeApplePath.close()
-        negativeApplePath.move(to: CGPoint(x: 390.75, y: 403.41))
-        negativeApplePath.addCurve(to: CGPoint(x: 262.32, y: 403.41), controlPoint1: CGPoint(x: 347.94, y: 403.41), controlPoint2: CGPoint(x: 300.37, y: 438.09))
-        negativeApplePath.addCurve(to: CGPoint(x: 233.78, y: 254.81), controlPoint1: CGPoint(x: 224.27, y: 368.74), controlPoint2: CGPoint(x: 224.28, y: 299.33))
-        negativeApplePath.addCurve(to: CGPoint(x: 235.96, y: 244.24), controlPoint1: CGPoint(x: 234.48, y: 251.52), controlPoint2: CGPoint(x: 235.2, y: 247.98))
-        negativeApplePath.addCurve(to: CGPoint(x: 262.32, y: 160.69), controlPoint1: CGPoint(x: 240.86, y: 220.21), controlPoint2: CGPoint(x: 247.54, y: 187.79))
-        negativeApplePath.addCurve(to: CGPoint(x: 319.4, y: 111.16), controlPoint1: CGPoint(x: 276.49, y: 134.71), controlPoint2: CGPoint(x: 299.99, y: 113.4))
-        negativeApplePath.addCurve(to: CGPoint(x: 414.53, y: 130.97), controlPoint1: CGPoint(x: 362.21, y: 106.2), controlPoint2: CGPoint(x: 381.23, y: 130.97))
-        negativeApplePath.addCurve(to: CGPoint(x: 504.91, y: 111.16), controlPoint1: CGPoint(x: 447.83, y: 130.97), controlPoint2: CGPoint(x: 476.37, y: 106.2))
-        negativeApplePath.addCurve(to: CGPoint(x: 571.5, y: 205.27), controlPoint1: CGPoint(x: 533.45, y: 116.11), controlPoint2: CGPoint(x: 571.5, y: 205.27))
-        negativeApplePath.addCurve(to: CGPoint(x: 528.69, y: 284.53), controlPoint1: CGPoint(x: 571.5, y: 205.27), controlPoint2: CGPoint(x: 528.69, y: 251.09))
-        negativeApplePath.addCurve(to: CGPoint(x: 571.5, y: 358.83), controlPoint1: CGPoint(x: 528.69, y: 317.96), controlPoint2: CGPoint(x: 571.5, y: 358.83))
-        negativeApplePath.addCurve(to: CGPoint(x: 504.91, y: 418.27), controlPoint1: CGPoint(x: 571.5, y: 358.83), controlPoint2: CGPoint(x: 548.91, y: 405.89))
-        negativeApplePath.addCurve(to: CGPoint(x: 390.75, y: 403.41), controlPoint1: CGPoint(x: 460.91, y: 430.66), controlPoint2: CGPoint(x: 433.56, y: 403.41))
-        negativeApplePath.close()
-        negativeApplePath.move(to: CGPoint(x: 800, y: 599))
-        negativeApplePath.addLine(to: CGPoint(x: 800, y: -1))
-        negativeApplePath.addLine(to: CGPoint(x: 0, y: -1))
-        negativeApplePath.addCurve(to: CGPoint(x: 0, y: -0), controlPoint1: CGPoint(x: 0, y: -1), controlPoint2: CGPoint(x: 0, y: -0.66))
-        negativeApplePath.addCurve(to: CGPoint(x: 0, y: 599), controlPoint1: CGPoint(x: 0, y: 27.17), controlPoint2: CGPoint(x: 0, y: 599))
-        negativeApplePath.addLine(to: CGPoint(x: 800, y: 599))
-        negativeApplePath.close()
-        
-        forms.append(negativeApplePath)
         return forms
     }
      
@@ -568,4 +534,5 @@ open class Forms {
         forms.append(swiftBirdPath)
         return forms
     }
+    
 }
