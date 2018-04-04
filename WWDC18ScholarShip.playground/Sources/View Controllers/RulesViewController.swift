@@ -11,7 +11,7 @@ public class RulesViewController : UIViewController {
     
         //Variables and Constants
         //Adding the san fransisco black font
-        let cfURL = Bundle.main.url(forResource: "SanFranciscoDisplay-Black", withExtension: "otf")! as CFURL
+        let cfURL = Bundle.main.url(forResource: "SanFranciscoDisplay-Regular", withExtension: "otf")! as CFURL
         CTFontManagerRegisterFontsForURL(cfURL, CTFontManagerScope.process, nil)
         var fontNames: [[AnyObject]] = []
         for name in UIFont.familyNames {
@@ -34,8 +34,8 @@ public class RulesViewController : UIViewController {
         backButton.addTarget(self, action: #selector(backButtonPressed), for: .touchUpInside)
         
         //Adding the textView that has all the rules in it
-        rulesTextView.font = UIFont(name: "SanFranciscoDisplay-Black", size: 20)
-        rulesTextView.text = "Hi there! Welcome to my playground! \n \n When coreML came out last year at WWDC17 I knew what I was going to make for my WWDC18 scholarship playground, a game of pictionary against a neural network. \n \n So when the scholarship details were released I started to develop that game. \n \n The game is simple. One round you draw and the 💻 guesses, the next round the 💻 draws and you have to guess. \n\n *When you are drawing please try and draw as large as possible and keep it simple!* \n \n Points are awarded for the time in which a correct guess is made. \n \n The game lasts for 6 rounds, 3 human drawing and 3 💻 drawing. \n \n I hope you enjoy this playground and hope to see all of you at WWDC18! \n\n *When the network see's a white screen it will guess that its an iPhone X, and some items are extremely easy for the network to guess, like the Watch and iPod, some are more difficult like the MacBook and Apple. If you draw another object than specified the network won't award you points, try it out to see if the network actually works!* \n\n\n\n\n\n"
+        rulesTextView.font = UIFont(name: "SanFranciscoDisplay-Regular", size: 20)
+        rulesTextView.text = "👋🏼 Hi there! Welcome to my playground! \n \n When coreML came out last year at WWDC17 I knew what I was going to make for my WWDC18 scholarship playground, a game of pictionary against a neural network, pictionairy! \n \n The game is simple. One round you draw and the 💻 guesses, the next round the 💻 draws and you have to guess. \n\n *When you are drawing please try and draw as large as possible and keep it simple!* \n \n Points are awarded for the time in which a correct guess is made, you have 100 seconds for each round. \n \n The game lasts for 6 rounds, 3 human drawing and 3 💻 drawing. \n \n 1. In the human drawing round, press the ⏩ button to start the round, and press the eraser button to clear the drawing field. \n\n 2. In the round where the 💻 draws, press ▶️ to start the drawing and then press 🔁 to shuffle the buttons untill you get the correct one. \n\n\n I hope you enjoy this playground and hope to see all of you at WWDC18! \n\n *When the network see's a white screen it will guess that its an iPhone X, and some items are extremely easy for the network to guess, like the Watch and iPod, some are more difficult like the MacBook and Apple. If you draw another object than specified the network won't award you points, try it out to see if the network actually works!* \n\n\n\n\n\n"
         rulesTextView.frame = CGRect(x: 12.5, y: 70, width: 360, height: 667)
         view.addSubview(rulesTextView)
         
@@ -44,7 +44,7 @@ public class RulesViewController : UIViewController {
     
     @objc func backButtonPressed() {
         let startVC = StartViewController()
-        startVC.modalTransitionStyle = .partialCurl
+        startVC.modalTransitionStyle = .coverVertical
         present(startVC, animated: true, completion: nil)
     }
     

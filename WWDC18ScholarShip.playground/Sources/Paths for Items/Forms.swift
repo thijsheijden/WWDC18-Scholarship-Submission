@@ -3,22 +3,6 @@ import SpriteKit
 
 ///Has methods to create Forms, which are built up of UIBezierPaths
 open class Forms {
-
-    
-    
-    public class func CircleForm(radius:CGFloat) -> [UIBezierPath] {
-        
-        let frame = CGRect(x: 0, y: 0, width: 800, height: 600)
-        
-        var forms : [UIBezierPath] = []
-        let midPoint = CGPoint(x: frame.size.width / 2.0, y: frame.size.height / 2.0)
-        
-        
-        let circlePath = UIBezierPath(arcCenter: midPoint, radius: radius, startAngle: 0, endAngle: 7, clockwise: true)
-        forms.append(circlePath)
-        
-        return forms
-    }
     
     public class func AppleForm() -> [UIBezierPath] {
         
