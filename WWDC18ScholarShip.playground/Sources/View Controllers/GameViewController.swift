@@ -459,7 +459,7 @@ public class GameViewController : UIViewController {
     }
     
     @objc func bringDrawViewToFront() {
-        self.view.bringSubview(toFront: drawView)
+        self.view.bringSubviewToFront(drawView)
     }
 
     func checkIfNetworkGuessedCorrectly(networkGuess: String?) {

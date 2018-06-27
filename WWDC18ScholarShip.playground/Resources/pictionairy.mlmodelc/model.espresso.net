@@ -1,8 +1,19 @@
 {
-  "storage" : "model.espresso.weights",
+  "transform_params" : {
+    "image (120x120)" : {
+      "bias_a" : 0,
+      "bias_g" : 0,
+      "bias_r" : 0,
+      "bias_b" : 0,
+      "center_mean" : 0,
+      "is_network_bgr" : 0,
+      "scale" : 1
+    }
+  },
   "properties" : {
 
   },
+  "storage" : "model.espresso.weights",
   "format_version" : 200,
   "layers" : [
     {
